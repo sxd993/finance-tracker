@@ -11,6 +11,7 @@ export const Register = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { register, handleSubmit, formState: { errors }, watch, setError } = useForm({
+    mode: 'onSubmit',
     defaultValues: {
       login: '',
       name: '',
