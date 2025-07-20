@@ -1,7 +1,6 @@
 fastapi
 uvicorn
-sqlalchemy
-asyncmy
+mysql-connector-python
 python-dotenv
 passlib[bcrypt]
 PyJWT

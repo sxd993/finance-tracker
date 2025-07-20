@@ -1,16 +1,21 @@
-from fastapi import APIRouter, HTTPException, Depends
+# auth.py
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
-from database import AsyncSessionLocal, User as UserModel
+from database import connect_to_db
 from passlib.context import CryptContext
-from sqlalchemy.future import select
 import jwt
 from datetime import datetime, timedelta
+import mysql.connector
+import os
 
 router = APIRouter()
 security = HTTPBearer(auto_error=False)
-pwd_context = CryptContext(schemes=["bcrypt"])
-SECRET_KEY = "simple-key"
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 class LoginData(BaseModel):
     login: str
@@ -21,47 +26,154 @@ class RegisterData(BaseModel):
     name: str
     password: str
 
+class TokenResponse(BaseModel):
+    token: str
+    user: dict
+
+class UserResponse(BaseModel):
+    login: str
+    name: str
+
 def create_token(login: str):
-    return jwt.encode({"sub": login, "exp": datetime.utcnow() + timedelta(hours=24)}, SECRET_KEY)
+    expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    to_encode = {"sub": login, "exp": expire}
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_user(token = Depends(security)):
-    if not token:
-        raise HTTPException(401, "No token")
+def get_current_user(request: Request, token=Depends(security)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    # Сначала проверяем Authorization header
+    auth_token = None
+    if token:
+        auth_token = token.credentials
+    
+    # Если токена нет в header, проверяем cookies
+    if not auth_token:
+        auth_token = request.cookies.get("token")
+    
+    if not auth_token:
+        raise credentials_exception
+    
     try:
-        payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=["HS256"])
-        login = payload.get("sub")
-        async with AsyncSessionLocal() as session:
-            result = await session.execute(select(UserModel).filter_by(login=login))
-            user = result.scalars().first()
-            if not user:
-                raise HTTPException(401, "User not found")
-            return {"login": user.login, "name": user.name}
-    except:
-        raise HTTPException(401, "Invalid token")
+        payload = jwt.decode(auth_token, SECRET_KEY, algorithms=[ALGORITHM])
+        login: str = payload.get("sub")
+        if login is None:
+            raise credentials_exception
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except jwt.InvalidTokenError:
+        raise credentials_exception
 
-@router.post("/login")
-async def login(data: LoginData):
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(select(UserModel).filter_by(login=data.login))
-        user = result.scalars().first()
-        if not user or not pwd_context.verify(data.password, user.password):
-            raise HTTPException(401, "Wrong login or password")
+    # Получаем данные пользователя из БД
+    conn = None
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT login, name FROM users WHERE login = %s", (login,))
+        user = cursor.fetchone()
         
-        return {"token": create_token(user.login), "user": {"login": user.login, "name": user.name}}
+        if not user:
+            raise credentials_exception
+            
+        return {"login": user[0], "name": user[1]}
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database error"
+        )
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
 
-@router.post("/register")
-async def register(data: RegisterData):
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(select(UserModel).filter_by(login=data.login))
-        if result.scalars().first():
-            raise HTTPException(400, "Login exists")
+@router.post("/login", response_model=TokenResponse)
+def login(data: LoginData):
+    conn = None
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT login, name, password FROM users WHERE login = %s", (data.login,))
+        user = cursor.fetchone()
         
-        new_user = UserModel(login=data.login, name=data.name, password=pwd_context.hash(data.password))
-        session.add(new_user)
-        await session.commit()
-        
-        return {"token": create_token(data.login), "user": {"login": data.login, "name": data.name}}
+        if not user or not pwd_context.verify(data.password, user[2]):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Wrong login or password"
+            )
 
-@router.get("/check")
-async def check(current_user = Depends(get_current_user)):
-    return {"user": current_user}
+        token = create_token(user[0])
+        return {
+            "token": token, 
+            "user": {"login": user[0], "name": user[1]}
+        }
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database error"
+        )
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+
+@router.post("/register", response_model=TokenResponse)
+def register(data: RegisterData):
+    conn = None
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT login FROM users WHERE login = %s", (data.login,))
+        if cursor.fetchone():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Login already exists"
+            )
+
+        hashed_password = pwd_context.hash(data.password)
+        cursor.execute(
+            "INSERT INTO users (login, name, password) VALUES (%s, %s, %s)",
+            (data.login, data.name, hashed_password)
+        )
+        conn.commit()
+
+        token = create_token(data.login)
+        return {
+            "token": token, 
+            "user": {"login": data.login, "name": data.name}
+        }
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database error"
+        )
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+
+@router.get("/check", response_model=UserResponse)
+def check_auth(current_user: dict = Depends(get_current_user)):
+    """
+    Проверяет валидность токена из Authorization header или cookies
+    и возвращает данные текущего пользователя.
+    """
+    return current_user
+
+@router.post("/logout")
+def logout():
+    """
+    Эндпоинт для выхода. На клиенте нужно удалить токен из cookies.
+    """
+    return {"message": "Successfully logged out"}

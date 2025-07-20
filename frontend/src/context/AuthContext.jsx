@@ -1,6 +1,7 @@
-import { createContext, useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { checkAuth } from '../api/authApi';
+import { createContext, useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { checkAuth } from "../api/authApi";
+import { getCookie } from "../api/api_client";
 
 export const AuthContext = createContext();
 
@@ -9,9 +10,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['auth'],
+    queryKey: ["auth"],
     queryFn: checkAuth,
     retry: 1,
+    enabled: !!getCookie("token"),
   });
 
   useEffect(() => {
@@ -25,8 +27,14 @@ export const AuthProvider = ({ children }) => {
   }, [data, error]);
 
   const value = useMemo(
-    () => ({ isAuthenticated, user, loading: isLoading, setIsAuthenticated, setUser }),
-    [isAuthenticated, user, isLoading]
+    () => ({
+      isAuthenticated,
+      user,
+      loading: isLoading,
+      setIsAuthenticated,
+      setUser,
+    }),
+    [isAuthenticated, user, isLoading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

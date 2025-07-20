@@ -1,14 +1,12 @@
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
+import { Loading } from "../components/Loading";
 
 export const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, loading } = useContext(AuthContext);
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-      </div>
-    );
+    return <Loading />;
   }
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
