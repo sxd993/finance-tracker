@@ -67,7 +67,7 @@ export const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <form
-        className="bg-white px-6 py-8 flex flex-col gap-4 w-full max-w-sm rounded-lg"
+        className="bg-white px-6 py-8 flex flex-col items-center gap-4 w-full max-w-sm rounded-lg md:container md:mx-auto"
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-2xl font-bold text-gray-600 text-center">
@@ -102,11 +102,10 @@ export const Login = () => {
                   "Логин может содержать только буквы, цифры и подчеркивания",
               },
             })}
-            className={`w-full px-4 py-2 text-gray-700 placeholder-gray-400 border rounded-md focus:outline-none focus:ring-2 transition-all duration-200 ${
-              errors.login
-                ? "border-red-300 focus:ring-red-400 focus:border-red-300"
-                : "border-gray-200 focus:ring-orange-400 focus:border-transparent"
-            }`}
+            className={`w-full px-4 py-2 text-gray-700 placeholder-gray-400 border rounded-md focus:outline-none focus:ring-2 transition-all duration-200 ${errors.login
+              ? "border-red-300 focus:ring-red-400 focus:border-red-300"
+              : "border-gray-200 focus:ring-orange-400 focus:border-transparent"
+              }`}
             disabled={mutation.isPending}
           />
           <div className="h-4">
@@ -129,11 +128,10 @@ export const Login = () => {
                 message: "Пароль должен быть не менее 6 символов",
               },
             })}
-            className={`w-full px-4 py-2 text-gray-700 placeholder-gray-400 border rounded-md focus:outline-none focus:ring-2 transition-all duration-200 ${
-              errors.password
-                ? "border-red-300 focus:ring-red-400 focus:border-red-300"
-                : "border-gray-200 focus:ring-orange-400 focus:border-transparent"
-            }`}
+            className={`w-full px-4 py-2 text-gray-700 placeholder-gray-400 border rounded-md focus:outline-none focus:ring-2 transition-all duration-200 ${errors.password
+              ? "border-red-300 focus:ring-red-400 focus:border-red-300"
+              : "border-gray-200 focus:ring-orange-400 focus:border-transparent"
+              }`}
             disabled={mutation.isPending}
           />
           <div className="h-4">
@@ -147,7 +145,7 @@ export const Login = () => {
 
         <button
           type="submit"
-          className="w-full px-4 py-2 mt-2 rounded-md bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-1/2 mx-auto px-4 py-2 mt-2 rounded-md bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Загрузка..." : "Войти"}

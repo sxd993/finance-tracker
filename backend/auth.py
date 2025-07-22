@@ -33,6 +33,7 @@ class TokenResponse(BaseModel):
 class UserResponse(BaseModel):
     login: str
     name: str
+    income: float
 
 def create_token(login: str):
     expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
@@ -77,13 +78,13 @@ def get_current_user(request: Request, token=Depends(security)):
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT login, name FROM users WHERE login = %s", (login,))
+        cursor.execute("SELECT login, name, income FROM users WHERE login = %s", (login,))
         user = cursor.fetchone()
         
         if not user:
             raise credentials_exception
             
-        return {"login": user[0], "name": user[1]}
+        return {"login": user[0], "name": user[1], "income": user[2]}
         
     except mysql.connector.Error as e:
         raise HTTPException(

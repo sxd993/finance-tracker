@@ -15,11 +15,12 @@ export const AuthProvider = ({ children }) => {
     retry: 1,
     enabled: !!getCookie("token"),
   });
+  console.log({data})
 
   useEffect(() => {
     if (data) {
       setIsAuthenticated(true);
-      setUser(data.user);
+      setUser(data);
     } else if (error) {
       setIsAuthenticated(false);
       setUser(null);

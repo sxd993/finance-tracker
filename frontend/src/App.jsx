@@ -2,23 +2,25 @@ import "./App.css";
 import { Auth } from "./pages/Auth/Auth";
 import { Login } from "./pages/Auth/Login/Login";
 import { Register } from "./pages/Auth/Register/Register";
-import { Habbits } from "./pages/Habbits/Habbits";
+import { DashBoardPage } from "./pages/Dashboard/DashBoardPage";
 import { ProtectedRoute } from "./utils/ProtectedRoute";
 import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
 } from "react-router-dom";
+import { Layout } from "./utils/Layout";
 
 function App() {
   const router = createBrowserRouter([
+    // Роуты без навигации
     {
       path: "/",
       element: <Auth />,
       children: [
         {
           path: "/",
-          element: <Navigate to="/login" replace />,
+          element: <Navigate to="login" replace />,
         },
         {
           path: "login",
@@ -30,13 +32,36 @@ function App() {
         },
       ],
     },
+    // Роуты С навигацией
     {
-      path: "/home",
-      element: (
-        <ProtectedRoute>
-          <Habbits />
-        </ProtectedRoute>
-      ),
+      path: "/",
+      element: <Layout />,
+      children: [
+        {
+          path: "/home",
+          element: (
+            <ProtectedRoute>
+              <DashBoardPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/transactions",
+          element: (
+            <ProtectedRoute>
+              <DashBoardPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/goals",
+          element: (
+            <ProtectedRoute>
+              <DashBoardPage />
+            </ProtectedRoute>
+          ),
+        },
+      ],  
     },
   ]);
 
