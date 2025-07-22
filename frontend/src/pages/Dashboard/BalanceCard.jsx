@@ -4,8 +4,7 @@ import { ModalAddIncome } from "./ModalAddIncome";
 import { addIncome } from "../../api/dashboardApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const BalanceCard = ({ income }) => {
-  const expenses = 1000;
+export const BalanceCard = ({ income, expenses }) => {
   const balance = income - expenses;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [incomeValue, setIncomeValue] = useState(income);

@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
     retry: 1,
     enabled: !!getCookie("token"),
   });
-  console.log({data})
 
   useEffect(() => {
     if (data) {
