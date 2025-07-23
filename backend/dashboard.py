@@ -3,39 +3,21 @@ from pydantic import BaseModel, Field
 from database import connect_to_db
 from auth import get_current_user
 import mysql.connector
-from decimal import Decimal
-from typing import Optional, List, Dict, Any
-from datetime import datetime
+from typing import List
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
 
 class IncomeData(BaseModel):
     income: float = Field(..., gt=0)  # Доход должен быть положительным
 
-
-@router.put("/add-income")
-def add_income(income: IncomeData, current_user: dict = Depends(get_current_user)):
-    try:
-        conn = connect_to_db()
-        cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE users SET income = %s WHERE login = %s",
-            (income.income, current_user["login"]),
-        )
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Пользователь не найден")
-        conn.commit()
-        return {"message": "Доход добавлен успешно"}
-    except mysql.connector.Error as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка базы данных: {str(e)}")
-    finally:
-        cursor.close()
-        conn.close()
-
-
 class CategorySummary(BaseModel):
-    category: str
+    id: int
+    name: str
     total: float
 
 class Transaction(BaseModel):
@@ -47,7 +29,23 @@ class Transaction(BaseModel):
 class ExpensesFullResponse(BaseModel):
     expenses: float
     categories: List[CategorySummary]
-    transactions: List[Transaction]
+
+@router.put("/add-income")
+def add_income(income: IncomeData, current_user: dict = Depends(get_current_user)):
+    try:
+        with connect_to_db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE users SET income = %s WHERE login = %s",
+                    (income.income, current_user["login"]),
+                )
+                if cursor.rowcount == 0:
+                    raise HTTPException(status_code=404, detail="Пользователь не найден")
+                conn.commit()
+                return {"message": "Доход добавлен успешно"}
+    except mysql.connector.Error as e:
+        logger.error(f"Database error in add_income: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка базы данных: {str(e)}")
 
 @router.get("/get-expenses", response_model=ExpensesFullResponse)
 def get_expenses(current_user: dict = Depends(get_current_user)):
@@ -63,6 +61,7 @@ def get_expenses(current_user: dict = Depends(get_current_user)):
                 if not user_row:
                     raise HTTPException(status_code=404, detail="Пользователь не найден")
                 user_id = user_row["id"]
+                logger.info(f"User ID: {user_id}")
 
                 # Сумма всех расходов
                 cursor.execute(
@@ -70,32 +69,35 @@ def get_expenses(current_user: dict = Depends(get_current_user)):
                     (user_id,)
                 )
                 total_expenses = float(cursor.fetchone()["total"])
+                logger.info(f"Total expenses: {total_expenses}")
 
-                # Сумма по категориям (теперь с названием категории)
+                # Сумма по категориям с LEFT JOIN для получения всех категорий
                 cursor.execute(
                     """
-                    SELECT c.name AS category, COALESCE(SUM(t.amount), 0) AS total
-                    FROM transactions t
-                    JOIN categories c ON t.category_id = c.id
-                    WHERE t.user_id = %s
-                    GROUP BY c.name
+                    SELECT c.id AS id, c.name AS name, COALESCE(SUM(t.amount), 0) AS total
+                    FROM categories c
+                    LEFT JOIN transactions t ON t.category_id = c.id AND t.user_id = %s
+                    GROUP BY c.id, c.name
                     """,
                     (user_id,)
                 )
                 categories = [
-                    {"category": row["category"], "total": float(row["total"])}
+                    CategorySummary(
+                        id=row["id"],
+                        name=row["name"],
+                        total=float(row["total"])
+                    )
                     for row in cursor.fetchall()
                 ]
+                logger.info(f"Categories fetched: {categories}")
 
-              
                 return {
                     "expenses": total_expenses,
                     "categories": categories,
                 }
     except mysql.connector.Error as e:
-        print(f"DB ERROR: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        logger.error(f"Database error in get_expenses: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка базы данных: {str(e)}")
     except Exception as e:
-        print(f"GENERAL ERROR: {e}")
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
-
+        logger.error(f"Server error in get_expenses: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
