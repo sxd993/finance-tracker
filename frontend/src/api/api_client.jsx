@@ -8,8 +8,6 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-
-
 const deleteCookie = (name) => {
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
 };
@@ -22,10 +20,13 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       deleteCookie("token"); // Удаляем локально, если токен недействителен
-      window.location.href = "/login"; // Редирект на страницу логина
+      // Проверяем, что мы не на странице логина, чтобы избежать бесконечного редиректа
+      if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+        window.location.href = "/login"; // Редирект на страницу логина
+      }
     }
     return Promise.reject(error);
   }
 );
 
-export {  deleteCookie };
+export { deleteCookie };

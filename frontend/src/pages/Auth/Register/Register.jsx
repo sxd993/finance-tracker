@@ -70,7 +70,13 @@ export const Register = () => {
   const errorMessage = getErrorMessage();
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex flex-col justify-center items-center h-screen gap-10">
+      <div>
+        <h1 className="text-2xl font-bold">
+          <span className="text-orange-500">Finance</span> Tracker
+        </h1>
+      </div>
+      
       <form
         className="bg-white px-6 py-8 flex flex-col gap-4 w-full max-w-sm rounded-lg"
         onSubmit={handleSubmit(onSubmit)}

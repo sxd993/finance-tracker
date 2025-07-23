@@ -1,5 +1,4 @@
 import "./App.css";
-import { Auth } from "./pages/Auth/Auth";
 import { Login } from "./pages/Auth/Login/Login";
 import { Register } from "./pages/Auth/Register/Register";
 import { DashBoardPage } from "./pages/Dashboard/DashBoardPage";
@@ -15,26 +14,21 @@ import { Goals } from "./pages/Goals/Goals";
 
 function App() {
   const router = createBrowserRouter([
-    // Роуты без навигации
+    // Корневой редирект
     {
       path: "/",
-      element: <Auth />,
-      children: [
-        {
-          path: "/",
-          element: <Navigate to="login" replace />,
-        },
-        {
-          path: "login",
-          element: <Login />,
-        },
-        {
-          path: "register",
-          element: <Register />,
-        },
-      ],
+      element: <Navigate to="/login" replace />,
     },
-    // Роуты С навигацией
+    // Роуты аутентификации
+    {
+      path: "/login",
+      element: <Login />,
+    },
+    {
+      path: "/register", 
+      element: <Register />,
+    },
+    // Защищенные роуты с навигацией
     {
       path: "/",
       element: <Layout />,
@@ -63,7 +57,7 @@ function App() {
             </ProtectedRoute>
           ),
         },
-      ],  
+      ],
     },
   ]);
 
