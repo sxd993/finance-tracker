@@ -3,7 +3,7 @@ export const TransactionList = ({ transactions }) => {
   const sortedTransactions = [...transactions.transactions].sort((a, b) => b.id - a.id);
 
   return (
-    <div className="flex flex-col items-center w-[90%] overflow-y-auto gap-5 py-5">
+    <div className="flex flex-col items-center w-[90%] overflow-y-auto gap-5 py-5 mx-auto">
       {sortedTransactions.map((transaction) => (
         <div
           key={transaction.id}

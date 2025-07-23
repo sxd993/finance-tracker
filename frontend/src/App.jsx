@@ -11,6 +11,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Layout } from "./utils/Layout";
+import { Goals } from "./pages/Goals/Goals";
 
 function App() {
   const router = createBrowserRouter([
@@ -58,7 +59,7 @@ function App() {
           path: "/goals",
           element: (
             <ProtectedRoute>
-              <DashBoardPage />
+              <Goals />
             </ProtectedRoute>
           ),
         },

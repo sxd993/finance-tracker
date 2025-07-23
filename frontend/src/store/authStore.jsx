@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
     queryKey: ['auth'],
     queryFn: checkAuth,
     retry: 1,
-    enabled: !!document.cookie.includes('token'),
   });
 
   useEffect(() => {

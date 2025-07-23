@@ -1,6 +1,17 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuthStore } from "../../store/authStore";
 
 export const Auth = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuthStore();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/home", { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
+
   return (
     <div className="flex flex-col justify-center items-center h-screen gap-10">
       <div>
