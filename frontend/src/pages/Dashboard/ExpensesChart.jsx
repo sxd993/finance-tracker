@@ -1,45 +1,65 @@
-import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getCategoryColor } from '../../utils/chartColors';
 
 export const ExpensesChart = ({ data }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="text-center text-gray-500 text-lg font-medium">
+      <div className="flex items-center justify-center h-[300px] text-gray-500 text-lg font-medium">
         Нет данных для отображения
       </div>
     );
   }
 
-  // Общая сумма трат
-  const totalExpenses = data.reduce((sum, item) => sum + item.total, 0);
-
   return (
-    <div className="relative flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-8 md:py-12">
-      <PieChart
-        width={400}
-        height={320}
-        className="w-full h-auto max-w-[90vw] sm:max-w-[400px] sm:h-[320px]"
-      >
-        <Pie
-          data={data}
-          dataKey="total"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={120}
-          fill="#8884d8"
-          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-          stroke="#fff"
-          strokeWidth={2}
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${entry.id || index}`} fill={getCategoryColor(entry.id)} />
-          ))}
-        </Pie>
-        <Tooltip formatter={(value) => `${value} ₽`} />
-        <Legend />
-      </PieChart>
-
+    <div className="w-full">
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="total"
+            nameKey="name"
+            cx="50%"
+            cy="45%"
+            outerRadius="65%"
+            fill="#8884d8"
+            animationDuration={800}
+            stroke="none"
+            label={false}
+            labelLine={false}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${entry.id || index}`} fill={getCategoryColor(entry.id)} />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value) => [`${value} ₽`, 'Сумма']}
+            contentStyle={{
+              backgroundColor: '#fff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              fontSize: '14px',
+              padding: '8px 12px',
+            }}
+            wrapperStyle={{
+              outline: 'none',
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      
+      {/* Легенда */}
+      <div className="flex flex-wrap justify-center gap-4">
+        {data.map((entry, index) => (
+          <div key={`legend-${entry.id || index}`} className="flex items-center gap-2">
+            <div 
+              className="w-4 h-4 rounded-sm"
+              style={{ backgroundColor: getCategoryColor(entry.id) }}
+            />
+            <span className="text-sm text-gray-700">{entry.name}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

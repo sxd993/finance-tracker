@@ -3,6 +3,7 @@ import { Auth } from "./pages/Auth/Auth";
 import { Login } from "./pages/Auth/Login/Login";
 import { Register } from "./pages/Auth/Register/Register";
 import { DashBoardPage } from "./pages/Dashboard/DashBoardPage";
+import { Transactions } from "./pages/Transactions/Transactions";
 import { ProtectedRoute } from "./utils/ProtectedRoute";
 import {
   createBrowserRouter,
@@ -49,7 +50,7 @@ function App() {
           path: "/transactions",
           element: (
             <ProtectedRoute>
-              <DashBoardPage />
+              <Transactions />
             </ProtectedRoute>
           ),
         },

@@ -20,7 +20,7 @@ export const DashBoardPage = () => {
   if (error) return <div>Ошибка загрузки расходов</div>;
   return (
     <>
-      <div className="flex flex-col  items-center justify-top h-screen !pt-5 gap-5">
+      <div className="flex flex-col  items-center justify-top h-screen pt-5 gap-5">
         <div className="flex flex-col items-center justify-center gap-2">
           <h1 className="text-2xl font-bold text-center">Главная</h1>
           <p className="text-sm text-center">Добро пожаловать, {user.name}</p>
