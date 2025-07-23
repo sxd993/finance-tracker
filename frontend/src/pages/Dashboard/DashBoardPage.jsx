@@ -1,13 +1,13 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { BalanceCard } from "./BalanceCard";
 import { Expenses } from "./Expenses";
-import { AuthContext } from "../../context/AuthContext";
 import { getExpensesByLogin } from "../../api/dashboardApi";
 import { useQuery } from "@tanstack/react-query";
 import { Loading } from "../../components/Loading";
+import { useAuthStore } from "../../store/authStore";
 
 export const DashBoardPage = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuthStore();
   const { data, isLoading, error } = useQuery({
     queryKey: ["expenses"],
     queryFn: getExpensesByLogin,

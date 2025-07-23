@@ -1,5 +1,5 @@
 # auth.py
-from fastapi import APIRouter, HTTPException, Depends, status, Request
+from fastapi import APIRouter, HTTPException, Depends, status, Request, Response
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from database import connect_to_db
@@ -97,7 +97,7 @@ def get_current_user(request: Request, token=Depends(security)):
             conn.close()
 
 @router.post("/login", response_model=TokenResponse)
-def login(data: LoginData):
+def login(data: LoginData, response: Response):
     conn = None
     try:
         conn = connect_to_db()
@@ -112,8 +112,18 @@ def login(data: LoginData):
             )
 
         token = create_token(user[0])
+        # Устанавливаем cookie с HttpOnly
+        response.set_cookie(
+            key="token",
+            value=token,
+            httponly=True,
+            secure=os.getenv("ENV", "development") == "production",  # Secure только в продакшене
+            samesite="Strict",  # Защита от CSRF
+            max_age=ACCESS_TOKEN_EXPIRE_HOURS * 3600,  # Время жизни в секундах
+            path="/",
+        )
         return {
-            "token": token, 
+            "token": token,  # Оставляем для совместимости
             "user": {"login": user[0], "name": user[1]}
         }
         
@@ -128,7 +138,7 @@ def login(data: LoginData):
             conn.close()
 
 @router.post("/register", response_model=TokenResponse)
-def register(data: RegisterData):
+def register(data: RegisterData, response: Response):
     conn = None
     try:
         conn = connect_to_db()
@@ -149,8 +159,18 @@ def register(data: RegisterData):
         conn.commit()
 
         token = create_token(data.login)
+        # Устанавливаем cookie с HttpOnly
+        response.set_cookie(
+            key="token",
+            value=token,
+            httponly=True,
+            secure=os.getenv("ENV", "development") == "production",
+            samesite="Strict",
+            max_age=ACCESS_TOKEN_EXPIRE_HOURS * 3600,
+            path="/",
+        )
         return {
-            "token": token, 
+            "token": token,  # Оставляем для совместимости
             "user": {"login": data.login, "name": data.name}
         }
         
@@ -173,8 +193,9 @@ def check_auth(current_user: dict = Depends(get_current_user)):
     return current_user
 
 @router.post("/logout")
-def logout():
+def logout(response: Response):
     """
-    Эндпоинт для выхода. На клиенте нужно удалить токен из cookies.
+    Удаляет cookie с токеном.
     """
+    response.delete_cookie(key="token", path="/")
     return {"message": "Successfully logged out"}

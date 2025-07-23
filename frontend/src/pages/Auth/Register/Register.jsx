@@ -1,17 +1,17 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { AuthContext } from "../../../context/AuthContext";
 import { useForm } from "react-hook-form";
 import { register as registerApi } from "../../../api/authApi";
 import { Loading } from "../../../components/Loading";
 import { useAuthErrors } from "../../../hooks/useAuthErrors";
+import { useAuthStore } from "../../../store/authStore";
 
 export const Register = () => {
-  const { setIsAuthenticated, setUser } = useContext(AuthContext);
+  const { setIsAuthenticated, setUser } = useAuthStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const { isAuthenticated, loading } = useAuthStore();
   const {
     register,
     handleSubmit,
