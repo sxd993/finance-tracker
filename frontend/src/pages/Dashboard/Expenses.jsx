@@ -9,7 +9,7 @@ export const Expenses = ({ categories }) => {
             <div key={category.id}>
               <div className="flex flex-row items-center justify-between mt-2">
                 <h2 className=" text-neutral-500">{category.name}</h2>
-                <p className=" text-orange-500">{category.total}</p>
+                <p className=" text-orange-500">{category.total} ₽</p>
               </div>
             </div>
         ))}

@@ -120,6 +120,12 @@ def add_transaction(
                         transaction.type,
                     ),
                 )
+                # Если категория доход (8), увеличиваем users.income
+                if transaction.category_id == 8:
+                    cursor.execute(
+                        "UPDATE users SET income = income + %s WHERE id = %s",
+                        (transaction.amount, user_id),
+                    )
                 conn.commit()
                 # Получаем все транзакции пользователя
                 cursor.execute(

@@ -48,18 +48,25 @@ def get_expenses(current_user: dict = Depends(get_current_user)):
                 user_id = user_row["id"]
                 logger.info(f"User ID: {user_id}")
 
-                # Сумма всех расходов
+                # Сумма всех расходов (только type = 'expense')
                 cursor.execute(
-                    "SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE user_id = %s",
+                    "SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE user_id = %s AND type = 'expense'",
                     (user_id,),
                 )
                 total_expenses = float(cursor.fetchone()["total"])
                 logger.info(f"Total expenses: {total_expenses}")
 
-                # Сумма по категориям с LEFT JOIN для получения всех категорий
+                # Сумма по категориям: для категории 8 (Доход) только type = 'income', для остальных только type = 'expense'
                 cursor.execute(
                     """
-                    SELECT c.id AS id, c.name AS name, COALESCE(SUM(t.amount), 0) AS total
+                    SELECT c.id AS id, c.name AS name,
+                        COALESCE(SUM(
+                            CASE 
+                                WHEN c.id = 8 AND t.type = 'income' THEN t.amount
+                                WHEN c.id != 8 AND t.type = 'expense' THEN t.amount
+                                ELSE 0
+                            END
+                        ), 0) AS total
                     FROM categories c
                     LEFT JOIN transactions t ON t.category_id = c.id AND t.user_id = %s
                     GROUP BY c.id, c.name

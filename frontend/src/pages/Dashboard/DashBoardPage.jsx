@@ -12,6 +12,7 @@ export const DashBoardPage = () => {
     queryKey: ["expenses"],
     queryFn: getExpensesByLogin,
   });
+  console.log(JSON.stringify(data));
   
   useEffect(() => {
   }, [user]);
