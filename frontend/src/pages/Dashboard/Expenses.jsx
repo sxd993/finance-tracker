@@ -1,7 +1,8 @@
+import { useMemo } from "react";
 import { ExpensesChart } from "./ExpensesChart";
 
 export const Expenses = ({ categories }) => {
-  const filteredData = categories.filter(item => item.total > 0 && item.name !== "Доход");
+  const filteredData = useMemo(categories.filter(item => item.total > 0 && item.name !== "Доход"), [categories]);
   return (
     <div className="flex flex-col w-full p-10" >
       <h1>Расходы по категориям</h1>

@@ -9,7 +9,7 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import { Layout } from "./utils/Layout";
+import { Layout } from "./components/Layout";
 import { Goals } from "./pages/Goals/Goals";
 
 function App() {

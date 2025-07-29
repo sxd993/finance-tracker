@@ -1,6 +1,11 @@
 import { formatDate } from '../../utils/formatDate';
-export const TransactionList = ({ transactions }) => {
-  const sortedTransactions = [...transactions.transactions].sort((a, b) => b.id - a.id);
+import React, { useMemo } from 'react';
+
+export const TransactionList = React.memo(({ transactions }) => {
+    const sortedTransactions = useMemo(() => {
+        return [...transactions.transactions].sort((a, b) => b.id - a.id);
+    }, [transactions.transactions]);
+  
 
   return (
     <div className="flex flex-col items-center w-[90%] overflow-y-auto gap-5 py-5 mx-auto">
@@ -23,4 +28,4 @@ export const TransactionList = ({ transactions }) => {
       ))}
     </div>
   );
-};
+});

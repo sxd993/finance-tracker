@@ -2,6 +2,7 @@ import { Modal } from "../../components/Modal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addIncome, addTransaction, getCategories } from "../../api/transactionApi";
 import { useForm } from "react-hook-form";
+import { useCallback } from "react";
 
 export const AddTransaction = ({ handleClose }) => {
     const { register, handleSubmit, watch, reset, setValue, formState: { errors, isValid } } = useForm({
@@ -49,7 +50,7 @@ export const AddTransaction = ({ handleClose }) => {
     });
 
     // При смене типа транзакции сбрасываем/устанавливаем значения по умолчанию
-    const handleTypeChange = (e) => {
+    const handleTypeChange = useCallback((e) => {
         const value = e.target.value;
         setValue("type", value);
         if (value === "income") {
@@ -59,7 +60,7 @@ export const AddTransaction = ({ handleClose }) => {
             setValue("category_id", "");
             setValue("description", "");
         }
-    };
+    }, (setValue));
 
     const onSubmit = (data) => {
         if (data.type === "income") {

@@ -2,6 +2,7 @@
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AddIcon from '@mui/icons-material/Add';
+import { formatMoney } from '../../utils/Goals/formatMoney';
 
 export const Goals = () => {
     const goals = [
@@ -10,9 +11,6 @@ export const Goals = () => {
         { id: 3, title: "Новый MacBook", amount: 150000, currentAmount: 140000 }
     ];
 
-    const formatMoney = (amount) => {
-        return new Intl.NumberFormat('ru-RU').format(amount);
-    };
 
     if (goals.length === 0) {
         return (
