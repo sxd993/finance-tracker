@@ -1,23 +1,12 @@
 import HomeIcon from '@mui/icons-material/Home';
-import { BalanceCard } from "../components/BalanceCard";
-import { Expenses } from "../components/Expenses";
+import { useCurrentUser } from '../../../shared/api/useCurrentUser'
+import { BalanceCard } from '../components/BalanceCard';
+import { useExpenses } from '../hooks/useExpenses';
+
 
 export const Dashboard = () => {
-  user = {
-    income: 20000
-  }
-  // Заглушки данных (замените на реальные запросы когда будете готовы)
-  const data = { expenses: 100, categories: [] };
-  const isLoading = false;
-  const error = null;
-
-
-
-  if (error) return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-      <div className="text-red-500 font-medium">Ошибка загрузки расходов</div>
-    </div>
-  );
+  const { user } = useCurrentUser();
+  const { expenses } = useExpenses();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -36,10 +25,8 @@ export const Dashboard = () => {
             </p>
           </div>
         </div>
-
+        <BalanceCard income={user?.income} expenses={expenses} />
         <div className="w-[90%] max-w-md flex flex-col gap-4">
-          <BalanceCard income={user?.income || 0} expenses={data?.expenses || 0} />
-          <Expenses categories={data?.categories || []} />
         </div>
       </div>
     </div>

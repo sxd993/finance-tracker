@@ -8,7 +8,7 @@ export const LoginPage = () => {
 
     const {
         mutate: login,
-        isPending: isLoading,
+        isLoading,
         error,
         reset: clearError
     } = useLogin();
@@ -28,11 +28,9 @@ export const LoginPage = () => {
         clearError();
 
         login(data, {
-            onSuccess: () => {
-                navigate("/home", { replace: true });
-            },
+            onSuccess: () => navigate("/home"),
         });
-    };
+    }
 
     const errorMessage = error?.response?.data?.message || error?.message;
 

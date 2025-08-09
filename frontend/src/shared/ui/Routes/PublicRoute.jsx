@@ -1,12 +1,18 @@
-import { useAuthStore } from "../../../features/auth/authStore";
+import { useAuthStore } from "../../../features/auth/store/useAuthStore";
 import { Navigate } from "react-router-dom";
 import { Loading } from "../../ui/Loading";
 
 
 export const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
+
   if (loading) {
     return <Loading />;
   }
-  return isAuthenticated ? <Navigate to='/dashboard' /> : children;
+
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
 };
