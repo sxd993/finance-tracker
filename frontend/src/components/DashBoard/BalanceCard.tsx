@@ -1,3 +1,4 @@
+
 export const BalanceCard = ({ income, expenses }) => {
   const balance = income - expenses;
   return (

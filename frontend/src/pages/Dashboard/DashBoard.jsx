@@ -1,23 +1,22 @@
 import { useEffect } from "react";
 import HomeIcon from '@mui/icons-material/Home';
-import WavingHandIcon from '@mui/icons-material/WavingHand';
-import { BalanceCard } from "./BalanceCard";
-import { Expenses } from "./Expenses";
-import { getExpensesByLogin } from "../../api/dashboardApi";
-import { useQuery } from "@tanstack/react-query";
-import { Loading } from "../../components/Loading";
-import { useAuthStore } from "../../store/authStore";
+import { BalanceCard } from "../../components/DashBoard/BalanceCard";
+import { Expenses } from "../../components/DashBoard/Expenses";
+// import { getExpensesByLogin } from "../../api/dashboardApi"; // Закомментировал неиспользуемый импорт
+// import { useQuery } from "@tanstack/react-query"; // Закомментировал неиспользуемый импорт
+import { Loading } from "../../shared/ui/Loading";
+import { useAuthStore } from "../../features/auth/authStore";
 
-export const DashBoardPage = () => {
+export const DashBoard = () => {
   const { user } = useAuthStore();
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["expenses"],
-    queryFn: getExpensesByLogin,
-  });
   
-  console.log(JSON.stringify(data));
+  // Заглушки данных (замените на реальные запросы когда будете готовы)
+  const data = { expenses: 100, categories: [] };
+  const isLoading = false;
+  const error = null;
 
   useEffect(() => {
+    // Логика загрузки данных (пока пустая)
   }, [user]);
 
   if (isLoading) return (
@@ -25,7 +24,7 @@ export const DashBoardPage = () => {
       <Loading />
     </div>
   );
-  
+
   if (error) return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
       <div className="text-red-500 font-medium">Ошибка загрузки расходов</div>
@@ -42,17 +41,17 @@ export const DashBoardPage = () => {
             </div>
             <h1 className="text-2xl font-bold text-gray-800">Главная</h1>
           </div>
-          
+
           <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
             <p className="text-sm text-gray-600 font-medium">
-              Добро пожаловать, <span className="text-orange-600">{user.name}</span>!
+              Добро пожаловать, <span className="text-orange-600">{user?.name || 'Пользователь'}</span>!
             </p>
           </div>
         </div>
-        
+
         <div className="w-[90%] max-w-md flex flex-col gap-4">
-          <BalanceCard income={user.income} expenses={data.expenses} />
-          <Expenses categories={data.categories} />
+          <BalanceCard income={user?.income || 0} expenses={data?.expenses || 0} />
+          <Expenses categories={data?.categories || []} />
         </div>
       </div>
     </div>
