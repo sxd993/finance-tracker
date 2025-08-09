@@ -1,5 +1,5 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { getCategoryColor } from '../../utils/chartColors';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { getCategoryColor } from '../utils/chartColors';
 
 export const ExpensesChart = ({ data }) => {
   if (!data || data.length === 0) {

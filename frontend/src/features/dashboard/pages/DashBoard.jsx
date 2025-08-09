@@ -1,29 +1,17 @@
-import { useEffect } from "react";
 import HomeIcon from '@mui/icons-material/Home';
-import { BalanceCard } from "../../components/DashBoard/BalanceCard";
-import { Expenses } from "../../components/DashBoard/Expenses";
-// import { getExpensesByLogin } from "../../api/dashboardApi"; // Закомментировал неиспользуемый импорт
-// import { useQuery } from "@tanstack/react-query"; // Закомментировал неиспользуемый импорт
-import { Loading } from "../../shared/ui/Loading";
-import { useAuthStore } from "../../features/auth/authStore";
+import { BalanceCard } from "../components/BalanceCard";
+import { Expenses } from "../components/Expenses";
 
-export const DashBoard = () => {
-  const { user } = useAuthStore();
-  
+export const Dashboard = () => {
+  user = {
+    income: 20000
+  }
   // Заглушки данных (замените на реальные запросы когда будете готовы)
   const data = { expenses: 100, categories: [] };
   const isLoading = false;
   const error = null;
 
-  useEffect(() => {
-    // Логика загрузки данных (пока пустая)
-  }, [user]);
 
-  if (isLoading) return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-      <Loading />
-    </div>
-  );
 
   if (error) return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
